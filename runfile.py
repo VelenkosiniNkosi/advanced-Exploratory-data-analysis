@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 st.set_page_config(page_title="AI Adoption Dashboard", layout="wide")
 
@@ -19,7 +17,7 @@ if uploaded_file is not None:
     st.subheader("Dataset Preview")
     st.dataframe(df.head())
 
-    # Sidebar filters
+    # Sidebar filter
     st.sidebar.header("Filter Data")
 
     min_usefulness = st.sidebar.slider(
@@ -44,27 +42,14 @@ if uploaded_file is not None:
     # Correlation
     st.subheader("Correlation Analysis")
 
-    corr_pu_bi = filtered_df["Perceived_Usefulness"].corr(filtered_df["Adoption_Intention"])
-    corr_peou_bi = filtered_df["Ease_of_Use"].corr(filtered_df["Adoption_Intention"])
-    corr_b_bi = filtered_df["Barriers"].corr(filtered_df["Adoption_Intention"])
-
-    st.write({
-        "Perceived Usefulness vs Adoption Intention": corr_pu_bi,
-        "Ease of Use vs Adoption Intention": corr_peou_bi,
-        "Barriers vs Adoption Intention": corr_b_bi
-    })
-
-    # Heatmap
-    st.subheader("Correlation Heatmap")
-
     corr_matrix = filtered_df.corr(numeric_only=True)
 
-    if corr_matrix.isnull().values.any():
-        corr_matrix = corr_matrix.fillna(0)
+    st.write("Correlation Matrix")
+    st.dataframe(corr_matrix)
 
-    fig, ax = plt.subplots()
-    sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", ax=ax)
-    st.pyplot(fig)
+    # Built-in heatmap alternative
+    st.subheader("Correlation Heatmap")
+    st.dataframe(corr_matrix.style.background_gradient(cmap="coolwarm"))
 
     # Bar chart
     st.subheader("Average Scores")
