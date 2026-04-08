@@ -40,4 +40,4 @@ This dashboard supports research on:
 "Barriers to Adoption of AI-Assisted Coding Tools Among Startups in Developing Economies"
 
 ## Author
-Student Project
+Darrell Nkosi
