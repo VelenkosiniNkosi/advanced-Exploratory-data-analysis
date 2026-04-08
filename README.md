@@ -3,34 +3,41 @@ test site
 
 live site 🌐: https://advanced-exploratory-data-analysis-rhskxfdsxmvsapqw57exmn.streamlit.app/
 
-# AI Adoption Dashboard for Startup Developers
+# AI-Assisted Coding Tools Adoption Dashboard
 
 ## Overview
-This project presents a data-driven dashboard that analyses the factors influencing the adoption of AI-assisted coding tools among startup developers in developing economies.
+This project analyzes the adoption of AI-assisted coding tools among startups in developing economies.
 
-The application is built using Streamlit and applies concepts from the Technology Acceptance Model (TAM), extended with additional barriers relevant to real-world conditions.
+The dashboard provides insights into key factors influencing adoption, including:
+- Perceived Usefulness
+- Ease of Use
+- Barriers to Adoption
+- Behavioral Intention to Use
 
 ## Features
-- Data cleaning and preprocessing
-- Interactive filtering of dataset
-- Key metrics visualization
+- Upload and analyze CSV datasets
+- Interactive filtering
+- Key metrics display
 - Correlation analysis
-- Heatmap for relationship analysis
-- Scatter plots for variable relationships
-- Plain language interpretation of results
-
-## Key Variables
-- Perceived Usefulness: Measures how beneficial users believe AI tools are
-- Ease of Use: Measures how easy the tools are to use
-- Adoption Intention: Likelihood of using AI tools
-- Barriers to Adoption: Challenges such as cost, trust, and access
+- Heatmap visualization
+- Clear interpretation of results
 
 ## Technologies Used
 - Python
+- Streamlit
 - Pandas
 - Matplotlib
-- Streamlit
+- Seaborn
 
-## How to Run the Project
+## How to Run
+1. Upload your dataset in CSV format
+2. Explore key metrics and insights
+3. Use filters to adjust analysis
+4. Interpret relationships between variables
 
-1. Clone the repository:
+## Research Context
+This dashboard supports research on:
+"Barriers to Adoption of AI-Assisted Coding Tools Among Startups in Developing Economies"
+
+## Author
+Student Project
