@@ -18,31 +18,45 @@ if uploaded_file is not None:
     # BULLETPROOF FILE READER
     # -----------------------------
     try:
-        # Read file ONCE as text
         file_content = uploaded_file.read().decode("utf-8")
 
-        # Detect delimiter automatically
         if "\t" in file_content:
             df = pd.read_csv(io.StringIO(file_content), sep="\t")
         else:
             df = pd.read_csv(io.StringIO(file_content))
 
-    except Exception as e:
+    except Exception:
         st.error("Error reading file. Please check your CSV format.")
         st.stop()
 
     # -----------------------------
-    # CLEAN DATA
+    # CLEAN + FIX STRUCTURE
     # -----------------------------
     df.columns = df.columns.str.strip()
 
-    # Force correct column names
-    df.columns = [
-        "Perceived_Usefulness",
-        "Ease_of_Use",
-        "Adoption_Intention",
-        "Barriers"
-    ]
+    # Debug (remove later if you want)
+    st.write("Detected Columns:", df.columns)
+
+    if len(df.columns) == 4:
+        df.columns = [
+            "Perceived_Usefulness",
+            "Ease_of_Use",
+            "Adoption_Intention",
+            "Barriers"
+        ]
+
+    elif len(df.columns) == 1:
+        df = df[df.columns[0]].str.split("\t", expand=True)
+        df.columns = [
+            "Perceived_Usefulness",
+            "Ease_of_Use",
+            "Adoption_Intention",
+            "Barriers"
+        ]
+
+    else:
+        st.error("Dataset format is incorrect. Expected exactly 4 columns.")
+        st.stop()
 
     # Convert to numeric
     df = df.apply(pd.to_numeric, errors='coerce')
