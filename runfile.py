@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import io
 
 st.set_page_config(page_title="AI Adoption Dashboard", layout="wide")
 
@@ -14,51 +15,41 @@ uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
 if uploaded_file is not None:
 
     # -----------------------------
-    # ROBUST CSV READER (FINAL FIX)
+    # BULLETPROOF FILE READER
     # -----------------------------
     try:
-        uploaded_file.seek(0)
-        df = pd.read_csv(uploaded_file)
+        # Read file ONCE as text
+        file_content = uploaded_file.read().decode("utf-8")
 
-        # If only one column → wrong delimiter
-        if len(df.columns) == 1:
-            uploaded_file.seek(0)
-            df = pd.read_csv(uploaded_file, sep="\t")
+        # Detect delimiter automatically
+        if "\t" in file_content:
+            df = pd.read_csv(io.StringIO(file_content), sep="\t")
+        else:
+            df = pd.read_csv(io.StringIO(file_content))
 
-    except Exception:
-        uploaded_file.seek(0)
-        df = pd.read_csv(uploaded_file, sep="\t")
+    except Exception as e:
+        st.error("Error reading file. Please check your CSV format.")
+        st.stop()
 
-    # Clean column names
+    # -----------------------------
+    # CLEAN DATA
+    # -----------------------------
     df.columns = df.columns.str.strip()
 
-    # If still broken (all data in one column), split manually
-    if len(df.columns) == 1:
-        df = df[df.columns[0]].str.split(",", expand=True)
-        df.columns = [
-            "Perceived_Usefulness",
-            "Ease_of_Use",
-            "Adoption_Intention",
-            "Barriers"
-        ]
-
-    # Ensure correct column names
-    expected_columns = [
+    # Force correct column names
+    df.columns = [
         "Perceived_Usefulness",
         "Ease_of_Use",
         "Adoption_Intention",
         "Barriers"
     ]
 
-    if len(df.columns) == 4:
-        df.columns = expected_columns
-
-    # Convert all values to numeric
+    # Convert to numeric
     df = df.apply(pd.to_numeric, errors='coerce')
 
-    # Handle empty dataset
+    # Check if empty
     if df.empty:
-        st.error("Uploaded file is empty or incorrectly formatted.")
+        st.error("Dataset is empty or corrupted.")
         st.stop()
 
     # -----------------------------
