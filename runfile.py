@@ -8,28 +8,41 @@ st.set_page_config(page_title="AI Adoption Dashboard", layout="wide")
 st.title("AI-Assisted Coding Tools Adoption Dashboard")
 st.write("Analyzing barriers and adoption factors in developing economies")
 
-# File upload
+# Upload file
 uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
 
 if uploaded_file is not None:
 
     # -----------------------------
-    # Robust CSV Reader (VERY IMPORTANT)
+    # ROBUST CSV READER (FINAL FIX)
     # -----------------------------
     try:
+        uploaded_file.seek(0)
         df = pd.read_csv(uploaded_file)
 
-        # If file is incorrectly formatted (1 column only)
+        # If only one column → wrong delimiter
         if len(df.columns) == 1:
+            uploaded_file.seek(0)
             df = pd.read_csv(uploaded_file, sep="\t")
 
     except Exception:
+        uploaded_file.seek(0)
         df = pd.read_csv(uploaded_file, sep="\t")
 
     # Clean column names
     df.columns = df.columns.str.strip()
 
-    # Force correct column names if needed
+    # If still broken (all data in one column), split manually
+    if len(df.columns) == 1:
+        df = df[df.columns[0]].str.split(",", expand=True)
+        df.columns = [
+            "Perceived_Usefulness",
+            "Ease_of_Use",
+            "Adoption_Intention",
+            "Barriers"
+        ]
+
+    # Ensure correct column names
     expected_columns = [
         "Perceived_Usefulness",
         "Ease_of_Use",
@@ -40,14 +53,22 @@ if uploaded_file is not None:
     if len(df.columns) == 4:
         df.columns = expected_columns
 
-    # Convert all values to numeric (important)
+    # Convert all values to numeric
     df = df.apply(pd.to_numeric, errors='coerce')
 
+    # Handle empty dataset
+    if df.empty:
+        st.error("Uploaded file is empty or incorrectly formatted.")
+        st.stop()
+
+    # -----------------------------
+    # DISPLAY DATA
+    # -----------------------------
     st.subheader("Dataset Preview")
     st.dataframe(df)
 
     # -----------------------------
-    # SIDEBAR FILTERS
+    # SIDEBAR FILTER
     # -----------------------------
     st.sidebar.header("Filter Data")
 
@@ -61,7 +82,7 @@ if uploaded_file is not None:
     df_filtered = df[df["Perceived_Usefulness"] >= min_usefulness]
 
     # -----------------------------
-    # CLEAR METRICS (NO ABBREVIATIONS)
+    # METRICS
     # -----------------------------
     st.subheader("Key Metrics")
 
@@ -88,13 +109,11 @@ if uploaded_file is not None:
     )
 
     # -----------------------------
-    # CORRELATION ANALYSIS
+    # CORRELATION
     # -----------------------------
     st.subheader("Relationship Analysis (Correlation)")
 
     correlation = df_filtered.corr()
-
-    st.write("Correlation Matrix:")
     st.dataframe(correlation)
 
     # -----------------------------
@@ -104,22 +123,21 @@ if uploaded_file is not None:
 
     fig, ax = plt.subplots()
     sns.heatmap(correlation, annot=True, cmap="coolwarm", ax=ax)
-
     st.pyplot(fig)
 
     # -----------------------------
-    # INTERPRETATION SECTION
+    # INTERPRETATION
     # -----------------------------
     st.subheader("Interpretation of Results")
 
     st.write("""
-    - A positive value indicates that two factors increase together.
-    - A negative value indicates an inverse relationship.
-    
-    Key insights:
-    - Perceived Usefulness may not always strongly influence adoption intention in developing environments.
-    - Ease of Use shows a weak relationship, suggesting other external factors may dominate.
-    - Barriers may behave differently depending on user context and access to technology.
+    - Positive values indicate variables increase together.
+    - Negative values indicate inverse relationships.
+
+    Insights:
+    - Perceived usefulness may not strongly predict adoption in all contexts.
+    - Ease of use shows moderate influence.
+    - Barriers can significantly affect adoption depending on environment.
     """)
 
 else:
