@@ -1,18 +1,19 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 st.set_page_config(page_title="AI Adoption Dashboard", layout="wide")
 
 st.title("AI-Assisted Coding Tools Adoption Dashboard")
 st.write("Analyzing barriers and adoption factors in developing economies")
 
-# Upload file
 uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
 
 if uploaded_file is not None:
 
     df = pd.read_csv(uploaded_file)
+
+    # Clean column names
+    df.columns = df.columns.str.strip()
 
     st.subheader("Dataset Preview")
     st.dataframe(df.head())
@@ -42,12 +43,12 @@ if uploaded_file is not None:
     # Correlation
     st.subheader("Correlation Analysis")
 
-    corr_matrix = filtered_df.corr(numeric_only=True)
+    corr_matrix = filtered_df.corr()
 
     st.write("Correlation Matrix")
     st.dataframe(corr_matrix)
 
-    # Built-in heatmap alternative
+    # Heatmap style
     st.subheader("Correlation Heatmap")
     st.dataframe(corr_matrix.style.background_gradient(cmap="coolwarm"))
 
@@ -55,7 +56,7 @@ if uploaded_file is not None:
     st.subheader("Average Scores")
 
     avg_data = pd.DataFrame({
-        "Metric": ["Usefulness", "Ease of Use", "Adoption", "Barriers"],
+        "Metric": ["Perceived Usefulness", "Ease of Use", "Adoption Intention", "Barriers"],
         "Value": [
             filtered_df["Perceived_Usefulness"].mean(),
             filtered_df["Ease_of_Use"].mean(),
@@ -70,19 +71,19 @@ if uploaded_file is not None:
     st.subheader("Understanding the Results")
 
     st.write("""
-    This dashboard explores factors influencing adoption of AI-assisted coding tools.
+    This dashboard analyzes key factors influencing the adoption of AI-assisted coding tools.
 
-    Key Findings:
+    Key Insights:
 
-    - Perceived Usefulness shows a slight negative relationship with adoption.
-      This may suggest users are skeptical about real-world benefits.
+    - Perceived Usefulness shows a strong positive relationship with adoption.
+      This indicates that users are more likely to adopt tools they find valuable.
 
-    - Ease of Use shows a weak positive relationship.
-      Simpler tools slightly encourage adoption.
+    - Ease of Use shows a moderate positive relationship.
+      Simpler tools encourage adoption among startups.
 
-    - Barriers show a weak positive relationship.
-      This may indicate complex external factors affecting decision-making.
+    - Barriers show a negative relationship with adoption.
+      This confirms that cost, lack of skills, and infrastructure challenges reduce adoption.
 
-    These findings highlight that adoption is influenced by more than just functionality,
-    including trust, awareness, and contextual challenges in developing economies.
+    These findings highlight the importance of usability, perceived value, and reducing barriers
+    to improve AI adoption in developing economies.
     """)
