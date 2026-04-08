@@ -2,44 +2,27 @@
 test site
 
 live site 🌐: https://advanced-exploratory-data-analysis-g45rc6pz6hmf6giyhzsdrm.streamlit.app/
-
-
-
 # AI-Assisted Coding Tools Adoption Dashboard
 
 ## Overview
-This project analyzes the adoption of AI-assisted coding tools among startups in developing economies.
-
-The dashboard provides insights into key factors influencing adoption, including:
-- Perceived Usefulness
-- Ease of Use
-- Barriers to Adoption
-- Behavioral Intention to Use
+This project presents an interactive data analysis dashboard built using Streamlit. It analyzes key factors influencing the adoption of AI-assisted coding tools in developing economies.
 
 ## Features
 - Upload and analyze CSV datasets
-- Interactive filtering
-- Key metrics display
-- Correlation analysis
-- Heatmap visualization
-- Clear interpretation of results
+- Automatic handling of different file formats (comma or tab-separated)
+- Interactive filtering based on perceived usefulness
+- Clear and detailed metrics (no abbreviations)
+- Correlation analysis between key factors
+- Heatmap visualization for relationship insights
 
-## Technologies Used
-- Python
-- Streamlit
-- Pandas
-- Matplotlib
-- Seaborn
+## Key Variables Explained
+- **Perceived Usefulness**: The degree to which users believe AI tools improve their performance
+- **Ease of Use**: How easy users find the tools to learn and operate
+- **Adoption Intention**: Likelihood that users will adopt AI tools
+- **Barriers**: Challenges such as cost, access, or technical limitations
 
 ## How to Run
-1. Upload your dataset in CSV format
-2. Explore key metrics and insights
-3. Use filters to adjust analysis
-4. Interpret relationships between variables
-
-## Research Context
-This dashboard supports research on:
-"Barriers to Adoption of AI-Assisted Coding Tools Among Startups in Developing Economies"
+1. Install dependencies:
 
 ## Author
 Darrell Nkosi
