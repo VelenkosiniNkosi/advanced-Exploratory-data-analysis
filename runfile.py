@@ -1,110 +1,103 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(page_title="AI Adoption Dashboard", layout="wide")
 
 st.title("AI-Assisted Coding Tools Adoption Dashboard")
-st.write("This dashboard explains factors influencing the adoption of AI coding tools among startup developers.")
+st.write("Analyzing barriers and adoption factors in developing economies")
 
-# Upload dataset
+# Upload file
 uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
 
-if uploaded_file:
-    # Load and clean dataset
-    df = pd.read_csv(uploaded_file, delimiter=';', decimal=',')
-    df = df.drop(columns=['Corr_PU_BI','Corr_PEOU_BI','Corr_B_BI'], errors='ignore')
-    df = df.apply(pd.to_numeric, errors='coerce')
+if uploaded_file is not None:
 
-    # Rename columns for clarity
-    df = df.rename(columns={
-        'PU_avg': 'Perceived Usefulness',
-        'PEOU_avg': 'Ease of Use',
-        'BI_avg': 'Adoption Intention',
-        'B_avg': 'Barriers to Adoption'
-    })
+    df = pd.read_csv(uploaded_file)
+
+    st.subheader("Dataset Preview")
+    st.dataframe(df.head())
 
     # Sidebar filters
     st.sidebar.header("Filter Data")
 
-    min_usefulness = st.sidebar.slider("Minimum Perceived Usefulness", 1.0, 5.0, 1.0)
-    min_ease = st.sidebar.slider("Minimum Ease of Use", 1.0, 5.0, 1.0)
+    min_usefulness = st.sidebar.slider(
+        "Minimum Perceived Usefulness",
+        float(df["Perceived_Usefulness"].min()),
+        float(df["Perceived_Usefulness"].max()),
+        float(df["Perceived_Usefulness"].min())
+    )
 
-    filtered_df = df[
-        (df['Perceived Usefulness'] >= min_usefulness) &
-        (df['Ease of Use'] >= min_ease)
-    ]
+    filtered_df = df[df["Perceived_Usefulness"] >= min_usefulness]
 
-    st.subheader("Filtered Dataset Preview")
-    st.write(filtered_df.head())
-
-    # Key metrics
-    st.subheader("Key Metrics (Average Scores)")
+    # Metrics
+    st.subheader("Key Metrics")
 
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric("Perceived Usefulness", round(filtered_df['Perceived Usefulness'].mean(), 2))
-    col2.metric("Ease of Use", round(filtered_df['Ease of Use'].mean(), 2))
-    col3.metric("Adoption Intention", round(filtered_df['Adoption Intention'].mean(), 2))
-    col4.metric("Barriers to Adoption", round(filtered_df['Barriers to Adoption'].mean(), 2))
+    col1.metric("Average Perceived Usefulness", round(filtered_df["Perceived_Usefulness"].mean(), 2))
+    col2.metric("Average Ease of Use", round(filtered_df["Ease_of_Use"].mean(), 2))
+    col3.metric("Adoption Intention", round(filtered_df["Adoption_Intention"].mean(), 2))
+    col4.metric("Barriers Level", round(filtered_df["Barriers"].mean(), 2))
 
-    st.info("All values are measured on a scale from 1 (Strongly Disagree) to 5 (Strongly Agree).")
-
-    # Correlation analysis
+    # Correlation
     st.subheader("Correlation Analysis")
 
-    corr_matrix = filtered_df[['Perceived Usefulness', 'Ease of Use', 'Adoption Intention', 'Barriers to Adoption']].corr()
-    st.write(corr_matrix)
+    corr_pu_bi = filtered_df["Perceived_Usefulness"].corr(filtered_df["Adoption_Intention"])
+    corr_peou_bi = filtered_df["Ease_of_Use"].corr(filtered_df["Adoption_Intention"])
+    corr_b_bi = filtered_df["Barriers"].corr(filtered_df["Adoption_Intention"])
+
+    st.write({
+        "Perceived Usefulness vs Adoption Intention": corr_pu_bi,
+        "Ease of Use vs Adoption Intention": corr_peou_bi,
+        "Barriers vs Adoption Intention": corr_b_bi
+    })
 
     # Heatmap
     st.subheader("Correlation Heatmap")
 
+    corr_matrix = filtered_df.corr(numeric_only=True)
+
+    if corr_matrix.isnull().values.any():
+        corr_matrix = corr_matrix.fillna(0)
+
     fig, ax = plt.subplots()
-    cax = ax.matshow(corr_matrix)
-    plt.xticks(range(len(corr_matrix.columns)), corr_matrix.columns, rotation=45)
-    plt.yticks(range(len(corr_matrix.columns)), corr_matrix.columns)
-    fig.colorbar(cax)
-
-    for (i, j), val in enumerate(corr_matrix.values.flatten()):
-        ax.text(j, i, f"{val:.2f}", ha='center', va='center')
-
+    sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", ax=ax)
     st.pyplot(fig)
 
-    # Scatter plots
-    st.subheader("Relationships Between Variables")
+    # Bar chart
+    st.subheader("Average Scores")
 
-    fig1, ax1 = plt.subplots()
-    ax1.scatter(filtered_df['Perceived Usefulness'], filtered_df['Adoption Intention'])
-    ax1.set_xlabel("Perceived Usefulness")
-    ax1.set_ylabel("Adoption Intention")
-    st.pyplot(fig1)
+    avg_data = pd.DataFrame({
+        "Metric": ["Usefulness", "Ease of Use", "Adoption", "Barriers"],
+        "Value": [
+            filtered_df["Perceived_Usefulness"].mean(),
+            filtered_df["Ease_of_Use"].mean(),
+            filtered_df["Adoption_Intention"].mean(),
+            filtered_df["Barriers"].mean()
+        ]
+    })
 
-    fig2, ax2 = plt.subplots()
-    ax2.scatter(filtered_df['Barriers to Adoption'], filtered_df['Adoption Intention'])
-    ax2.set_xlabel("Barriers to Adoption")
-    ax2.set_ylabel("Adoption Intention")
-    st.pyplot(fig2)
+    st.bar_chart(avg_data.set_index("Metric"))
 
-    # Interpretation
-    st.subheader("Interpretation")
-
-    pu_corr = corr_matrix.loc['Perceived Usefulness', 'Adoption Intention']
-    peou_corr = corr_matrix.loc['Ease of Use', 'Adoption Intention']
-    b_corr = corr_matrix.loc['Barriers to Adoption', 'Adoption Intention']
-
-    if pu_corr < 0:
-        st.write("Perceived usefulness does not strongly increase adoption in this dataset.")
-
-    if abs(peou_corr) < 0.2:
-        st.write("Ease of use has minimal influence on adoption decisions.")
-
-    if b_corr > 0:
-        st.write("Barriers do not significantly reduce adoption in this dataset.")
-
-    # Final conclusion
-    st.subheader("Conclusion")
+    # Explanation
+    st.subheader("Understanding the Results")
 
     st.write("""
-    The analysis shows that adoption of AI coding tools is not strongly influenced by usefulness or ease of use alone.
-    This suggests that external factors such as trust, awareness, and access to resources may be more important.
+    This dashboard explores factors influencing adoption of AI-assisted coding tools.
+
+    Key Findings:
+
+    - Perceived Usefulness shows a slight negative relationship with adoption.
+      This may suggest users are skeptical about real-world benefits.
+
+    - Ease of Use shows a weak positive relationship.
+      Simpler tools slightly encourage adoption.
+
+    - Barriers show a weak positive relationship.
+      This may indicate complex external factors affecting decision-making.
+
+    These findings highlight that adoption is influenced by more than just functionality,
+    including trust, awareness, and contextual challenges in developing economies.
     """)
